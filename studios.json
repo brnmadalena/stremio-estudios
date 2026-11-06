@@ -1,7 +1,7 @@
 {
   "addon": {
     "id": "community.estudios.br",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "name": "Studio",
     "catalogName": "Studio",
     "description": "Browse movies and series by studio (Marvel, Pixar, A24 and more), with titles and posters in Brazilian Portuguese. Data and images: TMDB. This product uses the TMDB API but is not endorsed or certified by TMDB."
@@ -21,8 +21,6 @@
       "expect": "^Marvel Studios",
       "seriesSearch": [
         "Marvel Television",
-        "ABC Studios",
-        "ABC Signature",
         "Marvel Animation"
       ]
     },
@@ -33,12 +31,6 @@
         "DC Studios",
         "DC Films",
         "DC Entertainment"
-      ],
-      "seriesSearch": [
-        "Warner Bros. Television",
-        "Warner Horizon Television",
-        "DC Comics",
-        "Warner Bros. Animation"
       ]
     },
     {
@@ -49,14 +41,10 @@
       ],
       "expect": "^Walt Disney (Pictures|Animation)",
       "seriesSearch": [
-        "Walt Disney Television",
         "Disney Television Animation",
-        "ABC Signature",
-        "ABC Studios",
-        "Disney Channel",
-        "Disney Junior",
         "Disney Branded Television",
-        "Touchstone Television"
+        "Disney Channel",
+        "Disney Junior"
       ]
     },
     {
@@ -66,8 +54,7 @@
       ],
       "expect": "Pixar",
       "seriesSearch": [
-        "Pixar Animation Studios",
-        "Disney Television Animation"
+        "Pixar Animation Studios"
       ]
     },
     {
@@ -78,11 +65,7 @@
       "expect": "^Warner Bros",
       "seriesSearch": [
         "Warner Bros. Television",
-        "Warner Bros. Television Studios",
-        "Warner Horizon Television",
-        "Warner Bros. Animation",
-        "Warner Bros. Unscripted Television",
-        "Warner Bros. International Television Production"
+        "Warner Bros. Animation"
       ]
     },
     {
@@ -94,11 +77,8 @@
       "seriesSearch": [
         "Universal Television",
         "Universal Content Productions",
-        "Universal Television Alternative Studio",
-        "Universal Cable Productions",
         "Universal Animation Studios",
-        "Universal Studios",
-        "Universal TV"
+        "Universal Cable Productions"
       ]
     },
     {
@@ -110,12 +90,7 @@
       "seriesSearch": [
         "Paramount Television",
         "Paramount Television Studios",
-        "CBS Studios",
-        "CBS Productions",
-        "Paramount+",
-        "Paramount Network",
-        "Paramount Animation",
-        "Nickelodeon Animation Studio"
+        "Paramount Animation"
       ]
     },
     {
@@ -128,11 +103,8 @@
       "seriesSearch": [
         "20th Television",
         "20th Century Fox Television",
-        "Twentieth Television",
         "20th Television Animation",
-        "Fox 21",
-        "Fox 21 Television Studios",
-        "Fox Television Studios"
+        "Fox 21"
       ]
     },
     {
@@ -160,10 +132,7 @@
       "ids": [
         6704
       ],
-      "expect": "^Illumination",
-      "seriesSearch": [
-        "Illumination Entertainment"
-      ]
+      "expect": "^Illumination"
     },
     {
       "name": "DreamWorks",
@@ -174,8 +143,7 @@
       "expect": "^DreamWorks",
       "seriesSearch": [
         "DreamWorks Animation Television",
-        "DreamWorks Television",
-        "DreamWorks Classics"
+        "DreamWorks Television"
       ]
     },
     {
@@ -185,9 +153,7 @@
       ],
       "expect": "^(Lionsgate|Lions Gate)",
       "seriesSearch": [
-        "Lionsgate Television",
-        "Lionsgate Films",
-        "Starz Originals"
+        "Lionsgate Television"
       ]
     },
     {
@@ -202,9 +168,7 @@
       "seriesSearch": [
         "Metro-Goldwyn-Mayer Television",
         "MGM Television",
-        "Amazon MGM Studios",
-        "MGM Television Entertainment",
-        "MGM Worldwide Television Productions"
+        "Amazon MGM Studios"
       ]
     },
     {
