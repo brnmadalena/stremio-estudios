@@ -117,15 +117,17 @@ async function getDetails(type, tmdbId) {
 }
 
 // ---------- studios -> TMDB companies ----------
-async function resolveCompanies(studio) {
+// "extra" resolves the series-only lists (seriesIds / seriesSearch): on TMDB, TV shows are
+// usually credited to television arms (e.g. "Warner Bros. Television"), not the film studio.
+async function resolveCompanies(studio, extra = false) {
   const found = new Map();
-  const expect = new RegExp(studio.expect || '.', 'i');
-  for (const id of studio.ids || []) {
+  const expect = new RegExp(extra ? '.' : studio.expect || '.', 'i');
+  for (const id of (extra ? studio.seriesIds : studio.ids) || []) {
     const c = await tmdb(`/company/${id}`);
     if (c && expect.test(c.name)) found.set(c.id, c.name);
     else console.warn(`  warning: company ${id} does not match "${studio.name}" (TMDB says: ${c ? c.name : 'not found'}), ignored`);
   }
-  for (const term of studio.search || []) {
+  for (const term of (extra ? studio.seriesSearch : studio.search) || []) {
     const r = await tmdb('/search/company', { query: term });
     const exact = r?.results?.find((x) => x.name.toLowerCase() === term.toLowerCase());
     if (exact) found.set(exact.id, exact.name);
@@ -141,7 +143,7 @@ async function collect(type, companyIds) {
   const base = {
     with_companies: companyIds.join('|'),
     sort_by: 'popularity.desc',
-    'vote_count.gte': config.minVotes,
+    'vote_count.gte': type === 'movie' ? config.minVotes : config.minVotesSeries ?? config.minVotes,
     include_adult: 'false',
   };
   const first = await tmdb(`/discover/${kind}`, { ...base, page: 1 });
@@ -228,9 +230,11 @@ for (const studio of config.studios) {
     console.warn(`  warning: no company found for "${studio.name}", the studio will be left out`);
   } else {
     const ids = companies.map((c) => c.id);
+    const tvCompanies = await resolveCompanies(studio, true);
+    const tvIds = [...new Set([...ids, ...tvCompanies.map((c) => c.id)])];
     items.movie = await collect('movie', ids);
-    items.series = await collect('series', ids);
-    console.log(`  ${companies.map((c) => `${c.name} (${c.id})`).join(', ')} -> ${items.movie.length} movies, ${items.series.length} series`);
+    items.series = await collect('series', tvIds);
+    console.log(`  ${companies.map((c) => `${c.name} (${c.id})`).join(', ')} + TV: ${tvCompanies.map((c) => `${c.name} (${c.id})`).join(', ') || 'none'} -> ${items.movie.length} movies, ${items.series.length} series`);
   }
   results.push({ studio, slug: slugify(studio.name), companies, items });
   await saveCache(); // keep progress even if a later step fails
