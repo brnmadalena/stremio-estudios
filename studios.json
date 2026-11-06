@@ -1,0 +1,33 @@
+{
+  "addon": {
+    "id": "community.estudios.br",
+    "version": "1.0.0",
+    "name": "Estúdios BR",
+    "catalogName": "Estúdios",
+    "description": "Filmes e séries organizados por estúdio, com títulos e capas em português do Brasil. Dados e imagens: TMDB. Este produto usa a API do TMDB, mas não é endossado nem certificado pelo TMDB."
+  },
+  "language": "pt-BR",
+  "maxItems": 300,
+  "pageSize": 100,
+  "minVotes": 20,
+  "concurrency": 8,
+  "featured": [],
+  "studios": [
+    { "name": "Marvel Studios", "ids": [420], "expect": "^Marvel Studios" },
+    { "name": "DC Studios", "ids": [], "search": ["DC Studios", "DC Films", "DC Entertainment"] },
+    { "name": "Walt Disney", "ids": [2, 6125], "expect": "^Walt Disney (Pictures|Animation)" },
+    { "name": "Pixar", "ids": [3], "expect": "Pixar" },
+    { "name": "Warner Bros", "ids": [174], "expect": "^Warner Bros" },
+    { "name": "Universal", "ids": [33], "expect": "^Universal Pictures" },
+    { "name": "Paramount", "ids": [4], "expect": "^Paramount" },
+    { "name": "20th Century Fox", "ids": [25, 127928], "expect": "^20th Century" },
+    { "name": "A24", "ids": [41077], "expect": "^A24" },
+    { "name": "Blumhouse", "ids": [3172], "expect": "Blumhouse" },
+    { "name": "Illumination", "ids": [6704], "expect": "^Illumination" },
+    { "name": "DreamWorks", "ids": [521, 7], "expect": "^DreamWorks" },
+    { "name": "Lionsgate", "ids": [1632], "expect": "^(Lionsgate|Lions Gate)" },
+    { "name": "MGM", "ids": [21], "search": ["Metro-Goldwyn-Mayer"], "expect": "^(Metro-Goldwyn-Mayer|MGM)" },
+    { "name": "New Line Cinema", "ids": [12], "expect": "^New Line" },
+    { "name": "Lucasfilm", "ids": [1], "expect": "^Lucasfilm" }
+  ]
+}

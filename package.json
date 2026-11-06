@@ -1,0 +1,15 @@
+{
+  "name": "stremio-estudios",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Addon de catálogo do Stremio por estúdio, gerado como arquivos estáticos para o GitHub Pages",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "verify": "node scripts/verify.mjs",
+    "test": "node test/run.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
