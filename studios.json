@@ -1,7 +1,7 @@
 {
   "addon": {
     "id": "community.estudios.br",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "name": "Studio",
     "catalogName": "Studio",
     "description": "Browse movies and series by studio (Marvel, Pixar, A24 and more), with titles and posters in Brazilian Portuguese. Data and images: TMDB. This product uses the TMDB API but is not endorsed or certified by TMDB."
@@ -13,21 +13,220 @@
   "concurrency": 8,
   "featured": [],
   "studios": [
-    { "name": "Marvel Studios", "ids": [420], "expect": "^Marvel Studios" },
-    { "name": "DC Studios", "ids": [], "search": ["DC Studios", "DC Films", "DC Entertainment"] },
-    { "name": "Walt Disney", "ids": [2, 6125], "expect": "^Walt Disney (Pictures|Animation)" },
-    { "name": "Pixar", "ids": [3], "expect": "Pixar" },
-    { "name": "Warner Bros", "ids": [174], "expect": "^Warner Bros" },
-    { "name": "Universal", "ids": [33], "expect": "^Universal Pictures" },
-    { "name": "Paramount", "ids": [4], "expect": "^Paramount" },
-    { "name": "20th Century Fox", "ids": [25, 127928], "expect": "^20th Century" },
-    { "name": "A24", "ids": [41077], "expect": "^A24" },
-    { "name": "Blumhouse", "ids": [3172], "expect": "Blumhouse" },
-    { "name": "Illumination", "ids": [6704], "expect": "^Illumination" },
-    { "name": "DreamWorks", "ids": [521, 7], "expect": "^DreamWorks" },
-    { "name": "Lionsgate", "ids": [1632], "expect": "^(Lionsgate|Lions Gate)" },
-    { "name": "MGM", "ids": [21], "search": ["Metro-Goldwyn-Mayer"], "expect": "^(Metro-Goldwyn-Mayer|MGM)" },
-    { "name": "New Line Cinema", "ids": [12], "expect": "^New Line" },
-    { "name": "Lucasfilm", "ids": [1], "expect": "^Lucasfilm" }
-  ]
+    {
+      "name": "Marvel Studios",
+      "ids": [
+        420
+      ],
+      "expect": "^Marvel Studios",
+      "seriesSearch": [
+        "Marvel Television",
+        "ABC Studios",
+        "ABC Signature",
+        "Marvel Animation"
+      ]
+    },
+    {
+      "name": "DC Studios",
+      "ids": [],
+      "search": [
+        "DC Studios",
+        "DC Films",
+        "DC Entertainment"
+      ],
+      "seriesSearch": [
+        "Warner Bros. Television",
+        "Warner Horizon Television",
+        "DC Comics",
+        "Warner Bros. Animation"
+      ]
+    },
+    {
+      "name": "Walt Disney",
+      "ids": [
+        2,
+        6125
+      ],
+      "expect": "^Walt Disney (Pictures|Animation)",
+      "seriesSearch": [
+        "Walt Disney Television",
+        "Disney Television Animation",
+        "ABC Signature",
+        "ABC Studios",
+        "Disney Channel",
+        "Disney Junior",
+        "Disney Branded Television",
+        "Touchstone Television"
+      ]
+    },
+    {
+      "name": "Pixar",
+      "ids": [
+        3
+      ],
+      "expect": "Pixar",
+      "seriesSearch": [
+        "Pixar Animation Studios",
+        "Disney Television Animation"
+      ]
+    },
+    {
+      "name": "Warner Bros",
+      "ids": [
+        174
+      ],
+      "expect": "^Warner Bros",
+      "seriesSearch": [
+        "Warner Bros. Television",
+        "Warner Bros. Television Studios",
+        "Warner Horizon Television",
+        "Warner Bros. Animation",
+        "Warner Bros. Unscripted Television",
+        "Warner Bros. International Television Production"
+      ]
+    },
+    {
+      "name": "Universal",
+      "ids": [
+        33
+      ],
+      "expect": "^Universal Pictures",
+      "seriesSearch": [
+        "Universal Television",
+        "Universal Content Productions",
+        "Universal Television Alternative Studio",
+        "Universal Cable Productions",
+        "Universal Animation Studios",
+        "Universal Studios",
+        "Universal TV"
+      ]
+    },
+    {
+      "name": "Paramount",
+      "ids": [
+        4
+      ],
+      "expect": "^Paramount",
+      "seriesSearch": [
+        "Paramount Television",
+        "Paramount Television Studios",
+        "CBS Studios",
+        "CBS Productions",
+        "Paramount+",
+        "Paramount Network",
+        "Paramount Animation",
+        "Nickelodeon Animation Studio"
+      ]
+    },
+    {
+      "name": "20th Century Fox",
+      "ids": [
+        25,
+        127928
+      ],
+      "expect": "^20th Century",
+      "seriesSearch": [
+        "20th Television",
+        "20th Century Fox Television",
+        "Twentieth Television",
+        "20th Television Animation",
+        "Fox 21",
+        "Fox 21 Television Studios",
+        "Fox Television Studios"
+      ]
+    },
+    {
+      "name": "A24",
+      "ids": [
+        41077
+      ],
+      "expect": "^A24",
+      "seriesSearch": [
+        "A24 Television"
+      ]
+    },
+    {
+      "name": "Blumhouse",
+      "ids": [
+        3172
+      ],
+      "expect": "Blumhouse",
+      "seriesSearch": [
+        "Blumhouse Television"
+      ]
+    },
+    {
+      "name": "Illumination",
+      "ids": [
+        6704
+      ],
+      "expect": "^Illumination",
+      "seriesSearch": [
+        "Illumination Entertainment"
+      ]
+    },
+    {
+      "name": "DreamWorks",
+      "ids": [
+        521,
+        7
+      ],
+      "expect": "^DreamWorks",
+      "seriesSearch": [
+        "DreamWorks Animation Television",
+        "DreamWorks Television",
+        "DreamWorks Classics"
+      ]
+    },
+    {
+      "name": "Lionsgate",
+      "ids": [
+        1632
+      ],
+      "expect": "^(Lionsgate|Lions Gate)",
+      "seriesSearch": [
+        "Lionsgate Television",
+        "Lionsgate Films",
+        "Starz Originals"
+      ]
+    },
+    {
+      "name": "MGM",
+      "ids": [
+        21
+      ],
+      "search": [
+        "Metro-Goldwyn-Mayer"
+      ],
+      "expect": "^(Metro-Goldwyn-Mayer|MGM)",
+      "seriesSearch": [
+        "Metro-Goldwyn-Mayer Television",
+        "MGM Television",
+        "Amazon MGM Studios",
+        "MGM Television Entertainment",
+        "MGM Worldwide Television Productions"
+      ]
+    },
+    {
+      "name": "New Line Cinema",
+      "ids": [
+        12
+      ],
+      "expect": "^New Line",
+      "seriesSearch": [
+        "New Line Television"
+      ]
+    },
+    {
+      "name": "Lucasfilm",
+      "ids": [
+        1
+      ],
+      "expect": "^Lucasfilm",
+      "seriesSearch": [
+        "Lucasfilm Animation"
+      ]
+    }
+  ],
+  "minVotesSeries": 5
 }
