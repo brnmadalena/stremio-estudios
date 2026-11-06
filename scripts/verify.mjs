@@ -1,43 +1,43 @@
 #!/usr/bin/env node
-// Confere um addon já publicado (ou local), pedindo as URLs do mesmo jeito que o Stremio.
-// Uso: node scripts/verify.mjs https://usuario.github.io/stremio-estudios
+// Checks a published (or local) addon by requesting URLs the same way Stremio does.
+// Usage: node scripts/verify.mjs https://YOUR_USERNAME.github.io/REPOSITORY_NAME
 const base = (process.argv[2] || '').replace(/\/+$/, '');
 if (!base) {
-  console.error('Uso: node scripts/verify.mjs <url-base-do-addon>');
+  console.error('Usage: node scripts/verify.mjs <addon-base-url>');
   process.exit(1);
 }
 
 let errors = 0;
 const fail = (msg) => {
   errors++;
-  console.error(`  ERRO: ${msg}`);
+  console.error(`  ERROR: ${msg}`);
 };
 
 async function getJson(url) {
   const res = await fetch(url);
   if (!res.ok) {
-    fail(`${res.status} em ${url}`);
+    fail(`${res.status} at ${url}`);
     return null;
   }
   try {
     return await res.json();
   } catch {
-    fail(`JSON inválido em ${url}`);
+    fail(`Invalid JSON at ${url}`);
     return null;
   }
 }
 
 function checkMetas(metas, url) {
-  if (!Array.isArray(metas)) return fail(`"metas" não é lista em ${url}`);
+  if (!Array.isArray(metas)) return fail(`"metas" is not a list at ${url}`);
   for (const m of metas) {
-    if (!/^tt\d+$/.test(m.id || '')) fail(`id fora do padrão IMDb (${m.id}) em ${url}`);
-    if (!m.name) fail(`título vazio em ${url}`);
-    if (!/^https:\/\//.test(m.poster || '')) fail(`capa sem https em ${url}`);
-    if (m.type !== 'movie' && m.type !== 'series') fail(`type inválido (${m.type}) em ${url}`);
+    if (!/^tt\d+$/.test(m.id || '')) fail(`id is not an IMDb id (${m.id}) at ${url}`);
+    if (!m.name) fail(`empty title at ${url}`);
+    if (!/^https:\/\//.test(m.poster || '')) fail(`poster without https at ${url}`);
+    if (m.type !== 'movie' && m.type !== 'series') fail(`invalid type (${m.type}) at ${url}`);
   }
 }
 
-// Simula a paginação do Stremio: skip = quantidade já carregada, até vir uma página vazia.
+// Simulates Stremio pagination: skip = number of items already loaded, until an empty page.
 async function walk(urlFor, label) {
   let loaded = 0;
   let pagesRead = 0;
@@ -49,24 +49,24 @@ async function walk(urlFor, label) {
     pagesRead++;
     if (!data.metas.length) break;
     loaded += data.metas.length;
-    if (pagesRead > 100) return fail(`paginação não termina em ${label}`);
+    if (pagesRead > 100) return fail(`pagination never ends in ${label}`);
   }
-  console.log(`  ${label}: ${loaded} títulos em ${pagesRead - 1} página(s)`);
-  if (loaded === 0) fail(`${label} está vazio`);
+  console.log(`  ${label}: ${loaded} titles in ${pagesRead - 1} page(s)`);
+  if (loaded === 0) fail(`${label} is empty`);
 }
 
 const manifest = await getJson(`${base}/manifest.json`);
 if (!manifest) process.exit(1);
-console.log(`${manifest.name} v${manifest.version}, ${manifest.catalogs.length} catálogos`);
+console.log(`${manifest.name} v${manifest.version}, ${manifest.catalogs.length} catalogs`);
 for (const k of ['id', 'version', 'name', 'description', 'resources', 'types', 'catalogs']) {
-  if (!manifest[k]) fail(`manifest sem "${k}"`);
+  if (!manifest[k]) fail(`manifest is missing "${k}"`);
 }
 
 for (const cat of manifest.catalogs) {
   console.log(`[${cat.type}] ${cat.id}`);
   const genre = cat.extra?.find((e) => e.name === 'genre');
   if (genre) {
-    if (!genre.options?.length) fail(`catálogo ${cat.id}/${cat.type} sem opções de gênero`);
+    if (!genre.options?.length) fail(`catalog ${cat.id}/${cat.type} has no genre options`);
     for (const option of genre.options || []) {
       const enc = encodeURIComponent(option);
       await walk(
@@ -86,5 +86,5 @@ for (const cat of manifest.catalogs) {
   }
 }
 
-console.log(errors ? `\n${errors} problema(s) encontrado(s).` : '\nTudo certo.');
+console.log(errors ? `\n${errors} problem(s) found.` : '\nAll good.');
 process.exit(errors ? 1 : 0);

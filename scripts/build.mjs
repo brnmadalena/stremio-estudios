@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// Gera o addon de catálogo do Stremio como arquivos estáticos (para o GitHub Pages).
-// Uso: TMDB_API_KEY=... node scripts/build.mjs
+// Generates the Stremio catalog addon as static files (for GitHub Pages).
+// Usage: TMDB_API_KEY=... node scripts/build.mjs
 import { mkdir, readFile, writeFile, rm } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
@@ -15,10 +15,10 @@ const CACHE_FILE = path.join(ROOT, 'cache', 'details.json');
 const DAY = 86400000;
 
 if (!KEY) {
-  console.error('Faltou a variável TMDB_API_KEY (crie o secret no GitHub, veja o README).');
+  console.error('Missing the TMDB_API_KEY environment variable (create the GitHub secret, see the README).');
   process.exit(1);
 }
-// Chaves v4 (token de leitura) são longas e usadas como Bearer; a chave v3 vai na URL.
+// v4 tokens are long and sent as a Bearer header; the v3 key goes in the URL.
 const useBearer = KEY.length > 40;
 
 const config = JSON.parse(await readFile(path.join(ROOT, 'studios.json'), 'utf8'));
@@ -29,10 +29,10 @@ const slugify = (s) =>
   s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
-// Os nomes viram parte de nomes de arquivo e de URLs, então ficam restritos.
+// Studio names become part of file names and URLs, so they are restricted.
 for (const s of config.studios) {
   if (/[\/\\?#%&=:*"<>|]/.test(s.name) || s.name.endsWith('.')) {
-    throw new Error(`Nome de estúdio inválido em studios.json: "${s.name}" (evite / \\ ? # % & = : * " < > | e ponto no final)`);
+    throw new Error(`Invalid studio name in studios.json: "${s.name}" (avoid / \\ ? # % & = : * " < > | and a trailing dot)`);
   }
 }
 
@@ -51,7 +51,7 @@ async function tmdb(p, params = {}, attempt = 0) {
       await sleep(1000 * 2 ** attempt);
       return tmdb(p, params, attempt + 1);
     }
-    throw new Error(`Falha de rede em ${p}: ${e.message}`);
+    throw new Error(`Network failure on ${p}: ${e.message}`);
   }
   if ((res.status === 429 || res.status >= 500) && attempt < 5) {
     const wait = Number(res.headers.get('retry-after')) || 2 ** attempt;
@@ -59,8 +59,8 @@ async function tmdb(p, params = {}, attempt = 0) {
     return tmdb(p, params, attempt + 1);
   }
   if (res.status === 404) return null;
-  if (res.status === 401) throw new Error('TMDB recusou a chave (401). Confira o secret TMDB_API_KEY.');
-  if (!res.ok) throw new Error(`TMDB respondeu ${res.status} em ${p}`);
+  if (res.status === 401) throw new Error('TMDB rejected the key (401). Check the TMDB_API_KEY secret.');
+  if (!res.ok) throw new Error(`TMDB answered ${res.status} on ${p}`);
   return res.json();
 }
 
@@ -78,7 +78,7 @@ async function mapLimit(items, limit, fn) {
   return out;
 }
 
-// ---------- cache de detalhes (id do IMDb, título e capa em pt-BR) ----------
+// ---------- details cache (IMDb id, localized title and poster) ----------
 const cache = existsSync(CACHE_FILE) ? JSON.parse(await readFile(CACHE_FILE, 'utf8')) : {};
 async function saveCache() {
   await mkdir(path.dirname(CACHE_FILE), { recursive: true });
@@ -89,7 +89,7 @@ async function getDetails(type, tmdbId) {
   const kind = type === 'movie' ? 'movie' : 'tv';
   const key = `${kind}:${tmdbId}`;
   const hit = cache[key];
-  // Com IMDb: renova a cada 90 dias. Sem IMDb: tenta de novo em 14 dias.
+  // With an IMDb id: refresh every 90 days. Without one: retry after 14 days.
   if (hit && Date.now() - hit.ts < (hit.imdb ? 90 : 14) * DAY) {
     stats.cacheHits++;
     return hit;
@@ -116,25 +116,25 @@ async function getDetails(type, tmdbId) {
   return entry;
 }
 
-// ---------- estúdios -> empresas do TMDB ----------
+// ---------- studios -> TMDB companies ----------
 async function resolveCompanies(studio) {
   const found = new Map();
   const expect = new RegExp(studio.expect || '.', 'i');
   for (const id of studio.ids || []) {
     const c = await tmdb(`/company/${id}`);
     if (c && expect.test(c.name)) found.set(c.id, c.name);
-    else console.warn(`  aviso: empresa ${id} não bate com "${studio.name}" (TMDB diz: ${c ? c.name : 'não encontrada'}), ignorada`);
+    else console.warn(`  warning: company ${id} does not match "${studio.name}" (TMDB says: ${c ? c.name : 'not found'}), ignored`);
   }
   for (const term of studio.search || []) {
     const r = await tmdb('/search/company', { query: term });
     const exact = r?.results?.find((x) => x.name.toLowerCase() === term.toLowerCase());
     if (exact) found.set(exact.id, exact.name);
-    else console.warn(`  aviso: busca por empresa "${term}" não achou nome idêntico`);
+    else console.warn(`  warning: company search for "${term}" found no identical name`);
   }
   return [...found].map(([id, name]) => ({ id, name }));
 }
 
-// ---------- lista de títulos de um estúdio ----------
+// ---------- title list for one studio ----------
 async function collect(type, companyIds) {
   const kind = type === 'movie' ? 'movie' : 'tv';
   const wantPages = Math.min(500, Math.ceil((config.maxItems * 1.25) / 20));
@@ -157,13 +157,13 @@ async function collect(type, companyIds) {
 
   const metas = [];
   const seenImdb = new Set();
-  // Busca os detalhes em blocos e para quando já tem títulos suficientes.
+  // Fetch details in chunks and stop as soon as there are enough titles.
   for (let i = 0; i < candidates.length && metas.length < config.maxItems; i += 50) {
     const chunk = candidates.slice(i, i + 50);
     const details = await mapLimit(chunk, config.concurrency, (r) =>
       getDetails(type, r.id).catch((e) => {
         stats.detailFailed++;
-        console.warn(`  aviso: falhou ${kind}:${r.id}: ${e.message}`);
+        console.warn(`  warning: failed ${kind}:${r.id}: ${e.message}`);
         return null;
       }),
     );
@@ -185,23 +185,23 @@ async function collect(type, companyIds) {
   return metas;
 }
 
-// ---------- escrita dos arquivos ----------
+// ---------- writing files ----------
 async function writeJson(rel, data) {
   const file = path.join(OUT, rel);
   await mkdir(path.dirname(file), { recursive: true });
   await writeFile(file, JSON.stringify(data));
 }
 
-// Escreve as páginas no formato de URL que o Stremio pede:
-//   .../catalog/movie/estudios/genre=Pixar.json
-//   .../catalog/movie/estudios/genre=Pixar&skip=100.json
-//   .../catalog/movie/estudio-pixar.json  e  .../catalog/movie/estudio-pixar/skip=100.json
+// Writes pages using the URL layout Stremio requests:
+//   .../catalog/movie/studio/genre=Pixar.json
+//   .../catalog/movie/studio/genre=Pixar&skip=100.json
+//   .../catalog/movie/studio-pixar.json  and  .../catalog/movie/studio-pixar/skip=100.json
 async function writePaged(type, catalogId, genre, metas) {
   const size = config.pageSize;
   const pages = Math.max(1, Math.ceil(metas.length / size));
   const skips = new Set();
   for (let p = 0; p <= pages; p++) skips.add(p * size);
-  skips.add(metas.length); // o Stremio pede skip = quantidade já carregada
+  skips.add(metas.length); // Stremio asks for skip = number of items already loaded
   for (const skip of skips) {
     const slice = metas.slice(skip, skip + size);
     let rel;
@@ -215,7 +215,7 @@ async function writePaged(type, catalogId, genre, metas) {
   }
 }
 
-// ---------- principal ----------
+// ---------- main ----------
 await rm(OUT, { recursive: true, force: true });
 await mkdir(OUT, { recursive: true });
 
@@ -225,41 +225,42 @@ for (const studio of config.studios) {
   const companies = await resolveCompanies(studio);
   const items = { movie: [], series: [] };
   if (!companies.length) {
-    console.warn(`  aviso: nenhuma empresa encontrada para "${studio.name}", estúdio ficará de fora`);
+    console.warn(`  warning: no company found for "${studio.name}", the studio will be left out`);
   } else {
     const ids = companies.map((c) => c.id);
     items.movie = await collect('movie', ids);
     items.series = await collect('series', ids);
-    console.log(`  ${companies.map((c) => `${c.name} (${c.id})`).join(', ')} -> ${items.movie.length} filmes, ${items.series.length} séries`);
+    console.log(`  ${companies.map((c) => `${c.name} (${c.id})`).join(', ')} -> ${items.movie.length} movies, ${items.series.length} series`);
   }
   results.push({ studio, slug: slugify(studio.name), companies, items });
-  await saveCache(); // guarda o progresso mesmo se uma etapa seguinte falhar
+  await saveCache(); // keep progress even if a later step fails
 }
 
 if (!results.some((r) => r.items.movie.length || r.items.series.length)) {
-  console.error('Nenhum título foi gerado. Confira a chave do TMDB e o studios.json.');
+  console.error('No titles were generated. Check the TMDB key and studios.json.');
   process.exit(1);
 }
 
+const catalogId = 'studio';
 const catalogs = [];
 for (const type of ['movie', 'series']) {
   const active = results.filter((r) => r.items[type].length);
   if (!active.length) continue;
   catalogs.push({
     type,
-    id: 'estudios',
+    id: catalogId,
     name: config.addon.catalogName,
     extra: [
       { name: 'genre', options: active.map((r) => r.studio.name), isRequired: true },
       { name: 'skip' },
     ],
   });
-  for (const r of active) await writePaged(type, 'estudios', r.studio.name, r.items[type]);
+  for (const r of active) await writePaged(type, catalogId, r.studio.name, r.items[type]);
 
   for (const featured of config.featured || []) {
     const r = active.find((x) => x.studio.name === featured);
     if (!r) continue;
-    const id = `estudio-${r.slug}`;
+    const id = `studio-${r.slug}`;
     catalogs.push({ type, id, name: r.studio.name, extra: [{ name: 'skip' }] });
     await writePaged(type, id, null, r.items[type]);
   }
@@ -292,18 +293,18 @@ await writeFile(path.join(OUT, 'index.html'), renderIndex(report));
 await saveCache();
 
 console.log(
-  `\nPronto: ${catalogs.length} catálogos. Detalhes buscados: ${stats.detailFetched}, do cache: ${stats.cacheHits}, falhas: ${stats.detailFailed}.`,
+  `\nDone: ${catalogs.length} catalogs. Details fetched: ${stats.detailFetched}, from cache: ${stats.cacheHits}, failures: ${stats.detailFailed}.`,
 );
 
 function renderIndex(rep) {
   const rows = rep.studios
     .map(
       (s) =>
-        `<li><span>${esc(s.name)}</span><small>${s.movies} filmes · ${s.series} séries</small></li>`,
+        `<li><span>${esc(s.name)}</span><small>${s.movies} movies · ${s.series} series</small></li>`,
     )
     .join('\n');
   return `<!doctype html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -328,17 +329,17 @@ function renderIndex(rep) {
 <body>
 <main>
   <h1>${esc(config.addon.name)}</h1>
-  <p>Filmes e séries por estúdio, com títulos e capas em português. No Stremio, abra <b>Descobrir</b>, escolha <b>${esc(config.addon.catalogName)}</b> e selecione o estúdio no filtro.</p>
+  <p>Movies and series organized by studio, with titles and posters in Brazilian Portuguese. In Stremio, open <b>Discover</b>, choose <b>${esc(config.addon.catalogName)}</b> and pick a studio in the filter.</p>
   <div class="btns">
-    <a class="btn" id="app" href="#">Instalar no Stremio</a>
-    <a class="btn" id="web" href="#">Instalar pelo Stremio Web</a>
-    <button class="alt" id="copy">Copiar link do addon</button>
+    <a class="btn" id="app" href="#">Install in Stremio</a>
+    <a class="btn" id="web" href="#">Install via Stremio Web</a>
+    <button class="alt" id="copy">Copy addon link</button>
   </div>
   <code id="url"></code>
   <ul>
 ${rows}
   </ul>
-  <footer>Atualizado em ${esc(rep.generatedAt.slice(0, 10))}. Este produto usa a API do TMDB, mas não é endossado nem certificado pelo TMDB.</footer>
+  <footer>Updated on ${esc(rep.generatedAt.slice(0, 10))}. This product uses the TMDB API but is not endorsed or certified by TMDB.</footer>
 </main>
 <script>
   var base = location.href.split('#')[0].split('?')[0].replace(/index\\.html$/, '').replace(/\\/?$/, '/');
@@ -348,7 +349,7 @@ ${rows}
   document.getElementById('web').href = 'https://web.stremio.com/#/addons?addon=' + encodeURIComponent(manifest);
   document.getElementById('copy').onclick = function () {
     var b = this;
-    navigator.clipboard.writeText(manifest).then(function () { b.textContent = 'Copiado'; });
+    navigator.clipboard.writeText(manifest).then(function () { b.textContent = 'Copied'; });
   };
 </script>
 </body>
