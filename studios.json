@@ -1,7 +1,7 @@
 {
   "addon": {
     "id": "community.estudios.br",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "name": "Studio",
     "catalogName": "Studio",
     "description": "Browse movies and series by studio (Marvel, Pixar, A24 and more), with titles and posters in Brazilian Portuguese. Data and images: TMDB. This product uses the TMDB API but is not endorsed or certified by TMDB."
@@ -45,7 +45,14 @@
         "Disney Branded Television",
         "Disney Channel",
         "Disney Junior"
-      ]
+      ],
+      "seriesNetworks": [
+        2739,
+        54,
+        44,
+        281
+      ],
+      "networkExpect": "^Disney"
     },
     {
       "name": "Pixar",
@@ -66,7 +73,12 @@
       "seriesSearch": [
         "Warner Bros. Television",
         "Warner Bros. Animation"
-      ]
+      ],
+      "seriesNetworks": [
+        49,
+        3186
+      ],
+      "networkExpect": "^(HBO|Max)"
     },
     {
       "name": "Universal",
@@ -79,7 +91,13 @@
         "Universal Content Productions",
         "Universal Animation Studios",
         "Universal Cable Productions"
-      ]
+      ],
+      "seriesNetworks": [
+        3353,
+        30,
+        77
+      ],
+      "networkExpect": "^(Peacock|USA|Syfy)"
     },
     {
       "name": "Paramount",
@@ -94,10 +112,10 @@
       ],
       "seriesNetworks": [
         4330,
-        318,
-        67
+        67,
+        55
       ],
-      "networkExpect": "^(Paramount|Showtime)"
+      "networkExpect": "^(Paramount|Showtime|Spike)"
     },
     {
       "name": "20th Century Fox",
@@ -111,7 +129,12 @@
         "20th Century Fox Television",
         "20th Television Animation",
         "Fox 21"
-      ]
+      ],
+      "seriesNetworks": [
+        88,
+        123
+      ],
+      "networkExpect": "^FX"
     },
     {
       "name": "A24",
@@ -160,7 +183,11 @@
       "expect": "^(Lionsgate|Lions Gate)",
       "seriesSearch": [
         "Lionsgate Television"
-      ]
+      ],
+      "seriesNetworks": [
+        318
+      ],
+      "networkExpect": "^Starz"
     },
     {
       "name": "MGM",
