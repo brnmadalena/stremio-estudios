@@ -1,4 +1,4 @@
-// Servidor TMDB simulado, só para testar o gerador sem gastar a API de verdade.
+// Mock TMDB server, only to test the generator without using the real API.
 import http from 'node:http';
 
 const COMPANIES = {
@@ -15,7 +15,7 @@ const COMPANIES = {
   3172: 'Blumhouse Productions',
   6704: 'Illumination',
   521: 'DreamWorks Animation',
-  7: 'Alguma Outra Empresa', // de propósito: deve ser recusada pelo "expect"
+  7: 'Some Other Company', // on purpose: must be rejected by "expect"
   1632: 'Lionsgate',
   21: 'Metro-Goldwyn-Mayer',
   12: 'New Line Cinema',
@@ -46,8 +46,8 @@ export function startMock(port = 0) {
     };
     if (url.searchParams.get('api_key') !== 'testkey') return json(401, { status_message: 'Invalid API key' });
     if (url.searchParams.get('language') !== 'pt-BR' && !p.includes('/search/')) {
-      // o gerador sempre deve pedir pt-BR
-      return json(400, { status_message: 'language esperado: pt-BR' });
+      // the generator must always request pt-BR
+      return json(400, { status_message: 'expected language: pt-BR' });
     }
 
     let m;
@@ -67,7 +67,7 @@ export function startMock(port = 0) {
     if ((m = p.match(/^\/3\/discover\/(movie|tv)$/))) {
       const kind = m[1];
       const ids = (url.searchParams.get('with_companies') || '').split('|').map(Number);
-      // Lucasfilm (1) e Pixar (3) não têm séries; os demais têm 25 por empresa. Filmes: 130 por empresa.
+      // Lucasfilm (1) and Pixar (3) have no series; the others have 25 per company. Movies: 130 per company.
       const per = kind === 'movie' ? 130 : 25;
       const usable = kind === 'tv' ? ids.filter((i) => i !== 1 && i !== 3) : ids;
       const total = per * usable.length;
@@ -92,11 +92,11 @@ export function startMock(port = 0) {
         images: { posters },
         external_ids: { imdb_id: imdb },
       };
-      if (kind === 'movie') Object.assign(body, { title: `Filme ${id}`, release_date: '2020-05-01', imdb_id: imdb });
-      else Object.assign(body, { name: `Série ${id}`, first_air_date: '2019-01-01' });
+      if (kind === 'movie') Object.assign(body, { title: `Movie ${id}`, release_date: '2020-05-01', imdb_id: imdb });
+      else Object.assign(body, { name: `Series ${id}`, first_air_date: '2019-01-01' });
       return json(200, body);
     }
-    return json(404, { status_message: 'não existe no mock' });
+    return json(404, { status_message: 'not found in mock' });
   });
   return new Promise((resolve) => {
     server.listen(port, '127.0.0.1', () => resolve({ server, port: server.address().port, calls }));
