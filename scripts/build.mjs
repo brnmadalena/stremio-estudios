@@ -136,14 +136,28 @@ async function resolveCompanies(studio, extra = false) {
   return [...found].map(([id, name]) => ({ id, name }));
 }
 
+// Series streamed or aired by a network (Paramount+, Showtime...) are credited to the network,
+// not to a production company, so they are resolved from a separate list of network ids.
+async function resolveNetworks(studio) {
+  const found = new Map();
+  const expect = new RegExp(studio.networkExpect || '.', 'i');
+  for (const id of studio.seriesNetworks || []) {
+    const n = await tmdb(`/network/${id}`);
+    if (n && expect.test(n.name)) found.set(n.id, n.name);
+    else console.warn(`  warning: network ${id} does not match "${studio.name}" (TMDB says: ${n ? n.name : 'not found'}), ignored`);
+  }
+  return [...found].map(([id, name]) => ({ id, name }));
+}
+
 // ---------- title list for one studio ----------
-async function collect(type, companyIds) {
-  const kind = type === 'movie' ? 'movie' : 'tv';
+// Companies and networks are separate TMDB filters (combined they would be ANDed), so each is
+// queried on its own and the results are merged by popularity.
+async function discoverAll(kind, filter, minVotes) {
   const wantPages = Math.min(500, Math.ceil((config.maxItems * 1.25) / 20));
   const base = {
-    with_companies: companyIds.join('|'),
+    ...filter,
     sort_by: 'popularity.desc',
-    'vote_count.gte': type === 'movie' ? config.minVotes : config.minVotesSeries ?? config.minVotes,
+    'vote_count.gte': minVotes,
     include_adult: 'false',
   };
   const first = await tmdb(`/discover/${kind}`, { ...base, page: 1 });
@@ -152,9 +166,19 @@ async function collect(type, companyIds) {
   const pages = [];
   for (let p = 2; p <= total; p++) pages.push(p);
   const rest = await mapLimit(pages, config.concurrency, (p) => tmdb(`/discover/${kind}`, { ...base, page: p }));
+  return [first, ...rest].flatMap((r) => r?.results || []);
+}
+
+async function collect(type, companyIds, networkIds = []) {
+  const kind = type === 'movie' ? 'movie' : 'tv';
+  const minVotes = type === 'movie' ? config.minVotes : config.minVotesSeries ?? config.minVotes;
+  const lists = [];
+  if (companyIds.length) lists.push(await discoverAll(kind, { with_companies: companyIds.join('|') }, minVotes));
+  if (networkIds.length) lists.push(await discoverAll(kind, { with_networks: networkIds.join('|') }, minVotes));
   const seenIds = new Set();
-  const candidates = [first, ...rest]
-    .flatMap((r) => r?.results || [])
+  const candidates = lists
+    .flat()
+    .sort((a, b) => (b.popularity || 0) - (a.popularity || 0))
     .filter((r) => (seenIds.has(r.id) ? false : seenIds.add(r.id)));
 
   const metas = [];
@@ -233,8 +257,9 @@ for (const studio of config.studios) {
     const tvCompanies = await resolveCompanies(studio, true);
     const tvIds = [...new Set([...ids, ...tvCompanies.map((c) => c.id)])];
     items.movie = await collect('movie', ids);
-    items.series = await collect('series', tvIds);
-    console.log(`  ${companies.map((c) => `${c.name} (${c.id})`).join(', ')} + TV: ${tvCompanies.map((c) => `${c.name} (${c.id})`).join(', ') || 'none'} -> ${items.movie.length} movies, ${items.series.length} series`);
+    const networks = await resolveNetworks(studio);
+    items.series = await collect('series', tvIds, networks.map((n) => n.id));
+    console.log(`  ${companies.map((c) => `${c.name} (${c.id})`).join(', ')} + TV: ${tvCompanies.map((c) => `${c.name} (${c.id})`).join(', ') || 'none'}; networks: ${networks.map((n) => `${n.name} (${n.id})`).join(', ') || 'none'} -> ${items.movie.length} movies, ${items.series.length} series`);
   }
   results.push({ studio, slug: slugify(studio.name), companies, items });
   await saveCache(); // keep progress even if a later step fails
