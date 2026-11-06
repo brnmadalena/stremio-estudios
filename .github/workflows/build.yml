@@ -1,4 +1,4 @@
-name: Atualizar addon
+name: Update addon
 
 on:
   schedule:
@@ -31,21 +31,21 @@ jobs:
         with:
           node-version: 22
 
-      - name: Gerar catálogos
+      - name: Build catalogs
         env:
           TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
         run: node scripts/build.mjs
 
-      # Guarda o cache de IDs do IMDb no repositório, mesmo se o passo anterior falhar,
-      # para a próxima execução continuar de onde parou.
-      - name: Salvar cache no repositório
+      # Keeps the IMDb id cache in the repository, even if the previous step fails,
+      # so the next run can continue where this one stopped.
+      - name: Save cache to the repository
         if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add cache
           if ! git diff --cached --quiet; then
-            git commit -m "Atualiza cache de IDs"
+            git commit -m "Update ID cache"
             git pull --rebase
             git push
           fi
