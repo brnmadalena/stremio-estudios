@@ -1,7 +1,7 @@
 {
   "addon": {
     "id": "community.estudios.br",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "name": "Studio",
     "catalogName": "Studio",
     "description": "Browse movies and series by studio (Marvel, Pixar, A24 and more), with titles and posters in Brazilian Portuguese. Data and images: TMDB. This product uses the TMDB API but is not endorsed or certified by TMDB."
@@ -108,7 +108,10 @@
       "seriesSearch": [
         "Paramount Television",
         "Paramount Television Studios",
-        "Paramount Animation"
+        "Paramount Animation",
+        "Paramount Network",
+        "Paramount+",
+        "Showtime Networks"
       ],
       "seriesNetworks": [
         4330,
@@ -132,9 +135,10 @@
       ],
       "seriesNetworks": [
         88,
-        123
+        123,
+        453
       ],
-      "networkExpect": "^FX"
+      "networkExpect": "^(FX|Hulu)"
     },
     {
       "name": "A24",
