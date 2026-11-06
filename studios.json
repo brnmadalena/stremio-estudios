@@ -1,7 +1,7 @@
 {
   "addon": {
     "id": "community.estudios.br",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "name": "Studio",
     "catalogName": "Studio",
     "description": "Browse movies and series by studio (Marvel, Pixar, A24 and more), with titles and posters in Brazilian Portuguese. Data and images: TMDB. This product uses the TMDB API but is not endorsed or certified by TMDB."
@@ -91,7 +91,13 @@
         "Paramount Television",
         "Paramount Television Studios",
         "Paramount Animation"
-      ]
+      ],
+      "seriesNetworks": [
+        4330,
+        318,
+        67
+      ],
+      "networkExpect": "^(Paramount|Showtime)"
     },
     {
       "name": "20th Century Fox",
