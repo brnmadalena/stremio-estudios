@@ -1,10 +1,10 @@
 {
   "addon": {
     "id": "community.estudios.br",
-    "version": "1.0.0",
-    "name": "Estúdios BR",
-    "catalogName": "Estúdios",
-    "description": "Filmes e séries organizados por estúdio, com títulos e capas em português do Brasil. Dados e imagens: TMDB. Este produto usa a API do TMDB, mas não é endossado nem certificado pelo TMDB."
+    "version": "1.0.1",
+    "name": "Studio",
+    "catalogName": "Studio",
+    "description": "Browse movies and series by studio (Marvel, Pixar, A24 and more), with titles and posters in Brazilian Portuguese. Data and images: TMDB. This product uses the TMDB API but is not endorsed or certified by TMDB."
   },
   "language": "pt-BR",
   "maxItems": 300,
